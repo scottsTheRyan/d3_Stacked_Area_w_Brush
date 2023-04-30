@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import {
   select,
-  scaleBand,
   axisBottom,
   stack,
   max,
   scaleLinear,
   axisLeft,
-  stackOrderAscending
+  stackOrderAscending,
+  area,
+  scalePoint,
+  curveCardinal
 } from "d3";
 import useResizeObserver from "./useResizeObserver";
 
@@ -37,29 +39,29 @@ function StackedBarChart({ data, keys, colors }) {
     ];
 
     // scales
-    const xScale = scaleBand()
+    const xScale = scalePoint()
       .domain(data.map(d => d.year))
-      .range([0, width])
-      .padding(0.25);
+      .range([0, width]);
 
     const yScale = scaleLinear()
       .domain(extent)
       .range([height, 0]);
 
+    // area generator
+    const areaGenerator = area()
+      .x(sequence => xScale(sequence.data.year))
+      .y0(sequence => yScale(sequence[0]))
+      .y1(sequence => yScale(sequence[1]))
+      .curve(curveCardinal);
+
     // rendering
     svg
       .selectAll(".layer")
       .data(layers)
-      .join("g")
+      .join("path")
       .attr("class", "layer")
       .attr("fill", layer => colors[layer.key])
-      .selectAll("rect")
-      .data(layer => layer)
-      .join("rect")
-      .attr("x", sequence => xScale(sequence.data.year))
-      .attr("width", xScale.bandwidth())
-      .attr("y", sequence => yScale(sequence[1]))
-      .attr("height", sequence => yScale(sequence[0]) - yScale(sequence[1]));
+      .attr("d", areaGenerator);
 
     // axes
     const xAxis = axisBottom(xScale);
