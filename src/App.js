@@ -17,9 +17,9 @@ const data = [
   },
   {
     year: 2000,
-    ava: 18,
-    ban: 28,
-    egg: 38,
+    ava: 12,
+    ban: 10,
+    egg: 55,
   },
   {
     year: 2010,
